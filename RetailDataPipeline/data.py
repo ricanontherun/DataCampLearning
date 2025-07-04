@@ -12,6 +12,11 @@ date_formats = {
 
 df = pd.read_csv("data/retail-data-raw.csv", dtype=data_types, parse_dates=parse_dates, date_format=date_formats)
 
+# Remove invalid data
+df = df[df.Date.notnull() & df.Weekly_Sales.notnull()]
+
+# Structure of data is one record per store, per department, per week.
+
 # clean up the data, focus on the fields we'll use in subsequent operations.
 df.fillna({
     'Weekly_Sales': df['Weekly_Sales'].mean(),
@@ -19,8 +24,11 @@ df.fillna({
 
 # Add month field
 df['Month'] = df['Date'].dt.month
+df['Year'] = df['Date'].dt.year
 
 # Average monthly sales
-monthly_sales = df.groupby('Month')['Weekly_Sales'].mean()
+grouped_by_month = df.groupby(['Month'])
+weekly_sales = grouped_by_month['Weekly_Sales']
+monthly_sales = weekly_sales.mean()
 
-
+print(monthly_sales)
